@@ -13,6 +13,7 @@
             <Button Name="MirroredButton" Access="Public" ToggleMode="True" Text="{Loc tile-spawn-window-mirror-button-text}"/>
             <Button Name="EraseButton" Access="Public" ToggleMode="True" Text="{Loc window-erase-button-text}"/>
         </BoxContainer>
+        <CheckBox Name="TargetLayer1Button" Access="Public" Text="{Loc tile-spawn-window-target-layer1-text}" />
         <Label Name="RotationLabel" Access="Public"/>
     </BoxContainer>
 </TileSpawnWindow>

@@ -31,6 +31,21 @@ public sealed partial class TileSpawningUIController : UIController
     private bool _eraseTile;
     private bool _mirrorableTile; // Tracks if the chosen tile even can be mirrored.
     private bool _mirroredTile;
+    private bool _targetLayer1Only;
+    private string? _targetLayer1PlacementOption;
+
+    public string? TargetLayer1PlacementOption
+    {
+        get => _targetLayer1PlacementOption;
+        set
+        {
+            _targetLayer1PlacementOption = value;
+            if (_window is { Disposed: false })
+                _window.TargetLayer1Button.Visible = value != null;
+        }
+    }
+
+    public event Action<bool>? TargetLayer1OnlyChanged;
 
     public override void Initialize()
     {
@@ -45,7 +60,9 @@ public sealed partial class TileSpawningUIController : UIController
     {
         var newObjInfo = new PlacementInformation
         {
-            PlacementOption = nameof(AlignTileAny),
+            PlacementOption = _targetLayer1Only && TargetLayer1PlacementOption is { } placementOption
+                ? placementOption
+                : nameof(AlignTileAny),
             TileType = tileType,
             Range = 400,
             IsTile = true
@@ -83,6 +100,27 @@ public sealed partial class TileSpawningUIController : UIController
         args.Button.Pressed = args.Pressed;
     }
 
+    private void OnTargetLayer1Toggled(ButtonToggledEventArgs args)
+    {
+        SetTargetLayer1Only(args.Pressed);
+    }
+
+    public void SetTargetLayer1Only(bool enabled, bool notify = true)
+    {
+        if (_targetLayer1Only == enabled)
+            return;
+
+        _targetLayer1Only = enabled;
+        if (_window is { Disposed: false })
+            _window.TargetLayer1Button.Pressed = enabled;
+
+        if (_placement.CurrentPermission is { IsTile: true } permission)
+            StartTilePlacement(permission.TileType);
+
+        if (notify)
+            TargetLayer1OnlyChanged?.Invoke(enabled);
+    }
+
     public void ToggleWindow()
     {
         EnsureWindow();
@@ -116,6 +154,9 @@ public sealed partial class TileSpawningUIController : UIController
         _window.RotationLabel.FontColorOverride = _mirrorableTile ? Color.White : Color.Gray;
         _window.MirroredButton.Pressed = _mirroredTile;
         _window.MirroredButton.OnToggled += OnTileMirroredToggled;
+        _window.TargetLayer1Button.Visible = TargetLayer1PlacementOption != null;
+        _window.TargetLayer1Button.Pressed = _targetLayer1Only;
+        _window.TargetLayer1Button.OnToggled += OnTargetLayer1Toggled;
         BuildTileList();
     }
 

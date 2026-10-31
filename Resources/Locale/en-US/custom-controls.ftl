@@ -9,6 +9,7 @@ entity-spawn-window-no-description = No description
 
 tile-spawn-window-title = Place Tiles
 tile-spawn-window-mirror-button-text = Mirror Tiles
+tile-spawn-window-target-layer1-text = Ignore layer 0
 
 ## Console
 
